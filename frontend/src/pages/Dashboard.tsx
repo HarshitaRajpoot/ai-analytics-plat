@@ -1,41 +1,103 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Users, MousePointerClick, Clock, TrendingUp } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-const mockChartData = [
-  { name: 'Mon', users: 4000, sessions: 2400 },
-  { name: 'Tue', users: 3000, sessions: 1398 },
-  { name: 'Wed', users: 2000, sessions: 9800 },
-  { name: 'Thu', users: 2780, sessions: 3908 },
-  { name: 'Fri', users: 1890, sessions: 4800 },
-  { name: 'Sat', users: 2390, sessions: 3800 },
-  { name: 'Sun', users: 3490, sessions: 4300 },
-];
+interface TrafficData {
+  totals: {
+    users: string | number;
+    sessions: string | number;
+    pageviews: string | number;
+    bounceRate: string;
+    avgSession: string;
+  };
+  daily: Array<{
+    name: string;
+    users: number;
+    sessions: number;
+  }>;
+}
 
 const Dashboard: React.FC = () => {
+  const [data, setData] = useState<TrafficData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/traffic');
+        const json = await response.json();
+        
+        if (json.error) {
+          setError(json.error);
+        } else {
+          setData(json);
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Failed to connect to backend API.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
         <div>
           <h1 style={styles.title}>Overview</h1>
-          <p style={styles.subtitle}>Welcome back! Here's your traffic summary.</p>
+          <p style={styles.subtitle}>Welcome back! Here's your live traffic summary.</p>
         </div>
+        {loading && <span style={{ color: 'var(--accent-primary)' }}>Refreshing data...</span>}
       </div>
 
+      {error && (
+        <div style={{ padding: '16px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', borderRadius: '8px' }}>
+          {error}
+        </div>
+      )}
+
       <div style={styles.grid}>
-        <StatCard title="Total Users" value="12,345" change={12.5} icon={Users} trend="up" />
-        <StatCard title="Sessions" value="45,678" change={8.2} icon={MousePointerClick} trend="up" />
-        <StatCard title="Bounce Rate" value="42.3%" change={-2.4} icon={TrendingUp} trend="down" />
-        <StatCard title="Avg. Session" value="2m 14s" change={5.1} icon={Clock} trend="up" />
+        <StatCard 
+          title="Total Users" 
+          value={data ? data.totals.users : '-'} 
+          change={0} 
+          icon={Users} 
+          trend="up" 
+        />
+        <StatCard 
+          title="Sessions" 
+          value={data ? data.totals.sessions : '-'} 
+          change={0} 
+          icon={MousePointerClick} 
+          trend="up" 
+        />
+        <StatCard 
+          title="Bounce Rate" 
+          value={data ? data.totals.bounceRate : '-'} 
+          change={0} 
+          icon={TrendingUp} 
+          trend="down" 
+        />
+        <StatCard 
+          title="Avg. Session" 
+          value={data ? data.totals.avgSession : '-'} 
+          change={0} 
+          icon={Clock} 
+          trend="up" 
+        />
       </div>
 
       <div style={styles.chartsGrid}>
         <div style={styles.chartCard} className="glass-panel animate-fade-in">
-          <h3 style={styles.chartTitle}>Traffic Overview</h3>
+          <h3 style={styles.chartTitle}>Traffic Overview (Last 7 Days)</h3>
           <div style={styles.chartWrapper}>
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={mockChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <AreaChart data={data ? data.daily : []} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="var(--accent-primary)" stopOpacity={0.8}/>
