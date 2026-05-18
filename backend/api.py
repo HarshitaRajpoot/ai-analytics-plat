@@ -20,12 +20,18 @@ PROPERTY_ID = os.getenv("GA4_PROPERTY_ID")
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOKEN_FILE = os.path.join(ROOT_DIR, "token.json")
 
+# Dynamically recreate token.json from the env variable on Render/prod if available
+TOKEN_JSON_CONTENT = os.getenv("TOKEN_JSON")
+if TOKEN_JSON_CONTENT:
+    with open(TOKEN_FILE, "w") as f:
+        f.write(TOKEN_JSON_CONTENT)
+
 app = FastAPI(title="AI Analytics Backend API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "*"],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
