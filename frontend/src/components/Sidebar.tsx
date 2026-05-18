@@ -1,12 +1,15 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, LineChart, Settings, Brain, BarChart2 } from 'lucide-react';
+import { LayoutDashboard, LineChart, Settings, Brain, BarChart2, Users, ExternalLink } from 'lucide-react';
+
+const TARGET_WEBSITE_URL = import.meta.env.VITE_TARGET_WEBSITE_URL || 'http://localhost:5500/target-website/index.html';
 
 const Sidebar: React.FC = () => {
   const navItems = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard },
     { name: 'Analytics', path: '/analytics', icon: LineChart },
     { name: 'AI Insights', path: '/insights', icon: Brain },
+    { name: 'CRM / Admin', path: '/admin', icon: Users },
     { name: 'Reports', path: '/reports', icon: BarChart2 },
     { name: 'Settings', path: '/settings', icon: Settings },
   ];
@@ -17,7 +20,7 @@ const Sidebar: React.FC = () => {
         <div style={styles.logoIcon}>
           <Brain size={24} color="#f8fafc" />
         </div>
-        <span style={styles.logoText}>Nexus AI</span>
+        <span style={styles.logoText}>Sphere Global</span>
       </div>
 
       <nav style={styles.nav}>
@@ -25,6 +28,7 @@ const Sidebar: React.FC = () => {
           <NavLink
             key={item.name}
             to={item.path}
+            end={item.path === '/'}
             style={({ isActive }) => ({
               ...styles.navItem,
               ...(isActive ? styles.navItemActive : {}),
@@ -43,6 +47,17 @@ const Sidebar: React.FC = () => {
       </nav>
 
       <div style={styles.bottomSection}>
+        {/* Visit Target Website button */}
+        <a
+          href={TARGET_WEBSITE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={styles.visitBtn}
+        >
+          <ExternalLink size={15} />
+          <span>Visit Target Website</span>
+        </a>
+
         <div style={styles.upgradeCard} className="glass-panel card-hover">
           <h4 style={{ color: 'var(--text-primary)', marginBottom: '8px', fontSize: '14px' }}>Pro Plan</h4>
           <p style={{ color: 'var(--text-secondary)', fontSize: '12px', marginBottom: '12px' }}>
@@ -54,6 +69,7 @@ const Sidebar: React.FC = () => {
     </aside>
   );
 };
+
 
 const styles: Record<string, React.CSSProperties> = {
   sidebar: {
@@ -132,6 +148,22 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
     fontSize: '13px',
     transition: 'background-color 0.2s ease',
+  },
+  visitBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    padding: '12px 16px',
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    border: '1px solid rgba(99, 102, 241, 0.2)',
+    color: '#a5b4fc',
+    borderRadius: '12px',
+    fontSize: '14px',
+    fontWeight: 600,
+    textDecoration: 'none',
+    marginBottom: '16px',
+    transition: 'all 0.2s ease',
   },
 };
 

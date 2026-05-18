@@ -18,6 +18,8 @@ interface TrafficData {
   }>;
 }
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 const Dashboard: React.FC = () => {
   const [data, setData] = useState<TrafficData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +28,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/traffic');
+        const response = await fetch(`${API_URL}/api/traffic`);
         const json = await response.json();
         
         if (json.error) {

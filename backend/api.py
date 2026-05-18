@@ -1,6 +1,8 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 from dotenv import load_dotenv
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from google.analytics.data_v1beta.types import (
@@ -10,6 +12,7 @@ from google.analytics.data_v1beta.types import (
     RunReportRequest,
 )
 from google.oauth2.credentials import Credentials
+from backend.database import save_contact, get_all_contacts, get_contacts_by_segment, get_contact_by_email
 
 load_dotenv()
 
@@ -19,26 +22,34 @@ TOKEN_FILE = os.path.join(ROOT_DIR, "token.json")
 
 app = FastAPI(title="AI Analytics Backend API")
 
-# Allow React frontend to make requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://ai-analytics-frontend-y0vi.onrender.com", "*"],
+    allow_origins=["http://localhost:5173", "*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# --- Pydantic Models ---
+class ContactForm(BaseModel):
+    full_name: str
+    email: str
+    company: Optional[str] = None
+    phone: Optional[str] = None
+    message: str
+
+# --- GA4 helpers ---
 def get_ga_client():
     if not os.path.exists(TOKEN_FILE):
-        raise FileNotFoundError("token.json not found! Please run auth_setup.py first.")
+        raise FileNotFoundError("token.json not found!")
     creds = Credentials.from_authorized_user_file(TOKEN_FILE, ['https://www.googleapis.com/auth/analytics.readonly'])
     return BetaAnalyticsDataClient(credentials=creds)
 
+# --- GA4 Endpoints ---
 @app.get("/api/traffic")
 def get_website_traffic(start_date: str = "7daysAgo", end_date: str = "today"):
     if not PROPERTY_ID or PROPERTY_ID == "YOUR_PROPERTY_ID_HERE":
         return {"error": "GA4_PROPERTY_ID environment variable is missing or invalid."}
-        
     client = get_ga_client()
     request = RunReportRequest(
         property=f"properties/{PROPERTY_ID}",
@@ -52,54 +63,38 @@ def get_website_traffic(start_date: str = "7daysAgo", end_date: str = "today"):
         ],
         date_ranges=[DateRange(start_date=start_date, end_date=end_date)],
     )
-
     try:
         response = client.run_report(request)
-        
         daily_data = []
         total_users = 0
         total_sessions = 0
         total_views = 0
         total_bounce = 0
         total_duration = 0
-        
+
         if not response.rows:
             return {"totals": {"users": 0, "sessions": 0, "pageviews": 0, "bounceRate": "0%", "avgSession": "0s"}, "daily": []}
 
         for row in response.rows:
             date = row.dimension_values[0].value
-            # format date as MM/DD
             formatted_date = f"{date[4:6]}/{date[6:8]}"
-            
             users = int(row.metric_values[0].value)
             sessions = int(row.metric_values[1].value)
             views = int(row.metric_values[2].value)
             bounce = float(row.metric_values[3].value)
             duration = float(row.metric_values[4].value)
-            
-            daily_data.append({
-                "date_raw": date,  # Keep for sorting
-                "name": formatted_date,
-                "users": users,
-                "sessions": sessions
-            })
-            
+            daily_data.append({"date_raw": date, "name": formatted_date, "users": users, "sessions": sessions})
             total_users += users
             total_sessions += sessions
             total_views += views
             total_bounce += bounce
             total_duration += duration
-            
+
         num_days = len(response.rows)
         avg_bounce = round(total_bounce / num_days * 100, 1) if num_days > 0 else 0
         avg_dur_seconds = int(total_duration / num_days) if num_days > 0 else 0
-        
         mins, secs = divmod(avg_dur_seconds, 60)
-        
-        # Sort chronologically
         daily_data.sort(key=lambda x: x["date_raw"])
-        
-        # Remove date_raw before sending to frontend
         for item in daily_data:
             del item["date_raw"]
 
@@ -115,3 +110,45 @@ def get_website_traffic(start_date: str = "7daysAgo", end_date: str = "today"):
         }
     except Exception as e:
         return {"error": str(e)}
+
+# --- Contact / CRM Endpoints ---
+@app.post("/api/contact")
+def submit_contact(form: ContactForm):
+    try:
+        result = save_contact(
+            full_name=form.full_name,
+            email=form.email,
+            company=form.company,
+            phone=form.phone,
+            message=form.message,
+        )
+        return {
+            "success": True,
+            "message": "Thank you! We'll be in touch soon.",
+            "segment": result["segment"]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/contacts")
+def list_contacts(segment: Optional[str] = None):
+    try:
+        if segment:
+            contacts = get_contacts_by_segment(segment)
+        else:
+            contacts = get_all_contacts()
+        return {"count": len(contacts), "contacts": contacts}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/contacts/{email}")
+def contact_journey(email: str):
+    try:
+        contacts = get_contact_by_email(email)
+        if not contacts:
+            raise HTTPException(status_code=404, detail="Contact not found")
+        return {"email": email, "history": contacts}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

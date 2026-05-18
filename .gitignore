@@ -20,6 +20,7 @@ dist-ssr
 token.json
 client_secret.json
 service-account.json
+contacts.db
 *.local
 
 # Python

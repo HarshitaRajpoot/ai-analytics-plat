@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sphere Global - Intelligent Analytics for Modern Businesses</title>
+  <meta name="description" content="Transform your business with AI-powered analytics. Book a free demo today." />
+
+  <!-- Google tag (gtag.js) - Same GA4 Property as Dashboard -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-M284E83HG1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-M284E83HG1', {
+      send_page_view: true
+    });
+
+    // --- Custom Event Tracking ---
+    function trackEvent(event_name, params) {
+      gtag('event', event_name, params);
+    }
+
+    // Track scroll depth
+    let scrollTracked = { 25: false, 50: false, 75: false, 100: false };
+    window.addEventListener('scroll', function() {
+      const scrollPercent = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+      [25, 50, 75, 100].forEach(function(depth) {
+        if (scrollPercent >= depth && !scrollTracked[depth]) {
+          scrollTracked[depth] = true;
+          trackEvent('scroll_depth', { depth: depth + '%' });
+        }
+      });
+    });
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #12121a;
+      --border: rgba(255,255,255,0.08);
+      --accent: #6366f1;
+      --accent2: #8b5cf6;
+      --text: #f1f5f9;
+      --text2: #94a3b8;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* NAVBAR */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 48px;
+      background: rgba(10,10,15,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo { font-size: 22px; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    nav a { color: var(--text2); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+    nav a:hover { color: var(--text); }
+    .nav-links { display: flex; gap: 32px; }
+    .nav-cta { padding: 10px 24px; background: var(--accent); color: #fff !important; border-radius: 8px; font-weight: 600; }
+    .nav-cta:hover { opacity: 0.9; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 24px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); border-radius: 999px; font-size: 13px; color: var(--accent); margin-bottom: 24px; }
+    .hero h1 { font-size: clamp(40px, 6vw, 72px); font-weight: 800; line-height: 1.1; margin-bottom: 24px; }
+    .hero h1 span { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 18px; color: var(--text2); max-width: 560px; margin: 0 auto 40px; }
+    .hero-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary { padding: 16px 32px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; text-decoration: none; transition: transform 0.2s, opacity 0.2s; }
+    .btn-primary:hover { transform: translateY(-2px); opacity: 0.9; }
+    .btn-secondary { padding: 16px 32px; background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; text-decoration: none; transition: border-color 0.2s; }
+    .btn-secondary:hover { border-color: var(--accent); }
+
+    /* STATS STRIP */
+    .stats-strip { display: flex; justify-content: center; gap: 64px; padding: 40px 24px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .stat-item { text-align: center; }
+    .stat-value { font-size: 32px; font-weight: 800; color: var(--accent); }
+    .stat-label { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+    /* FEATURES */
+    .section { padding: 100px 24px; max-width: 1100px; margin: 0 auto; }
+    .section-label { font-size: 13px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+    .section-title { font-size: clamp(28px, 4vw, 42px); font-weight: 700; margin-bottom: 16px; }
+    .section-sub { color: var(--text2); font-size: 16px; max-width: 500px; margin-bottom: 56px; }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+    .feature-card {
+      padding: 28px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .feature-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+    .feature-icon { width: 48px; height: 48px; background: rgba(99,102,241,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 24px; }
+    .feature-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .feature-card p { color: var(--text2); font-size: 14px; line-height: 1.7; }
+
+    /* FORM SECTION */
+    .form-section { padding: 100px 24px; background: var(--bg2); }
+    .form-inner { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+    .form-info h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; margin-bottom: 16px; }
+    .form-info p { color: var(--text2); margin-bottom: 32px; }
+    .benefit { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .benefit-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .benefit p { color: var(--text2); font-size: 14px; margin: 0; }
+
+    form { display: flex; flex-direction: column; gap: 16px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    label { font-size: 13px; color: var(--text2); font-weight: 500; display: block; margin-bottom: 6px; }
+    input, textarea, select {
+      width: 100%; padding: 12px 16px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-family: 'Inter', sans-serif; font-size: 14px;
+      outline: none; transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 120px; }
+    .submit-btn {
+      padding: 14px; background: var(--accent); color: #fff;
+      border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s, transform 0.2s;
+    }
+    .submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .success-msg { padding: 16px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 8px; color: var(--success); font-size: 14px; text-align: center; }
+    .error-msg { padding: 16px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; color: var(--danger); font-size: 14px; }
+
+    /* FOOTER */
+    footer { padding: 40px 24px; text-align: center; border-top: 1px solid var(--border); color: var(--text2); font-size: 14px; }
+
+    @media(max-width: 768px) {
+      nav { padding: 16px 20px; }
+      .nav-links { display: none; }
+      .form-inner { grid-template-columns: 1fr; gap: 40px; }
+      .field-row { grid-template-columns: 1fr; }
+      .stats-strip { gap: 32px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <div class="logo">Sphere Global</div>
+    <div class="nav-links">
+      <a href="#features" onclick="trackEvent('nav_click', {link: 'features'})">Features</a>
+      <a href="#demo" onclick="trackEvent('nav_click', {link: 'demo'})">Demo</a>
+      <a href="#contact" onclick="trackEvent('nav_click', {link: 'contact'})">Contact</a>
+    </div>
+    <a href="#contact" class="nav-cta" onclick="trackEvent('cta_click', {location: 'navbar'})">Book a Demo</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <div class="hero-badge">
+        <span>&#10024;</span> AI-Powered Analytics Platform
+      </div>
+      <h1>Turn Data Into <span>Revenue</span><br/>Not Reports</h1>
+      <p>Sphere Global connects your entire business data, applies machine learning, and delivers insights your team can act on — instantly.</p>
+      <div class="hero-btns">
+        <a href="#contact" class="btn-primary" onclick="trackEvent('cta_click', {location: 'hero_primary'})">Book a Free Demo</a>
+        <a href="#features" class="btn-secondary" onclick="trackEvent('cta_click', {location: 'hero_secondary'})">See Features</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-strip">
+    <div class="stat-item"><div class="stat-value">10x</div><div class="stat-label">Faster Insights</div></div>
+    <div class="stat-item"><div class="stat-value">500+</div><div class="stat-label">Businesses Served</div></div>
+    <div class="stat-item"><div class="stat-value">98%</div><div class="stat-label">Customer Satisfaction</div></div>
+    <div class="stat-item"><div class="stat-value">$2M+</div><div class="stat-label">Revenue Generated</div></div>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <div class="section-label">What We Offer</div>
+    <h2 class="section-title">Everything You Need to Grow</h2>
+    <p class="section-sub">Built for modern teams who want answers, not more dashboards to manage.</p>
+    <div class="features-grid">
+      <div class="feature-card" onclick="trackEvent('feature_card_click', {feature: 'ai_insights'})">
+        <div class="feature-icon">&#129504;</div>
+        <h3>AI Insights</h3>
+        <p>Claude-powered analysis automatically surfaces anomalies, trends, and opportunities in your data every day.</p>
+      </div>
+      <div class="feature-card" onclick="trackEvent('feature_card_click', {feature: 'realtime'})">
+        <div class="feature-icon">&#9889;</div>
+        <h3>Real-Time Analytics</h3>
+        <p>Live dashboards updated instantly. Know what your users are doing right now, not yesterday.</p>
+      </div>
+      <div class="feature-card" onclick="trackEvent('feature_card_click', {feature: 'crm'})">
+        <div class="feature-icon">&#128101;</div>
+        <h3>Customer Intelligence</h3>
+        <p>Automatically segment visitors into audience groups based on their behaviour and intent signals.</p>
+      </div>
+      <div class="feature-card" onclick="trackEvent('feature_card_click', {feature: 'automation'})">
+        <div class="feature-icon">&#9881;</div>
+        <h3>Smart Automation</h3>
+        <p>Ask your data questions in plain English. Claude MCP handles the rest — no SQL required.</p>
+      </div>
+      <div class="feature-card" onclick="trackEvent('feature_card_click', {feature: 'journey'})">
+        <div class="feature-icon">&#128200;</div>
+        <h3>Journey Mapping</h3>
+        <p>Visualise the complete path from first visit to conversion for every customer segment.</p>
+      </div>
+      <div class="feature-card" onclick="trackEvent('feature_card_click', {feature: 'reports'})">
+        <div class="feature-icon">&#128196;</div>
+        <h3>Automated Reports</h3>
+        <p>Weekly summaries, alerts on drops, and custom reports delivered to your inbox automatically.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT / BOOK DEMO FORM -->
+  <div class="form-section" id="contact">
+    <div class="form-inner">
+      <div class="form-info">
+        <div class="section-label">Get Started</div>
+        <h2>Book a Free Demo</h2>
+        <p>See Sphere Global in action with your own data. Our team will set everything up for you.</p>
+        <div class="benefit"><div class="benefit-dot"></div><p>Live walkthrough with your real data</p></div>
+        <div class="benefit"><div class="benefit-dot"></div><p>Custom setup for your industry</p></div>
+        <div class="benefit"><div class="benefit-dot"></div><p>No credit card required</p></div>
+        <div class="benefit"><div class="benefit-dot"></div><p>Response within 24 hours</p></div>
+      </div>
+
+      <div>
+        <div id="success-message" class="success-msg" style="display:none;">
+          &#10003; Thank you! We'll be in touch within 24 hours.
+        </div>
+        <div id="error-message" class="error-msg" style="display:none;"></div>
+
+        <form id="contact-form" onsubmit="handleSubmit(event)">
+          <div class="field-row">
+            <div>
+              <label for="full_name">Full Name *</label>
+              <input id="full_name" name="full_name" type="text" placeholder="Harshita Rajpoot" required />
+            </div>
+            <div>
+              <label for="email">Email Address *</label>
+              <input id="email" name="email" type="email" placeholder="harshita@company.com" required />
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label for="company">Company</label>
+              <input id="company" name="company" type="text" placeholder="Sphere Global Ltd." />
+            </div>
+            <div>
+              <label for="phone">Telephone</label>
+              <input id="phone" name="phone" type="tel" placeholder="+91 98765 43210" />
+            </div>
+          </div>
+          <div>
+            <label for="message">Your Message *</label>
+            <textarea id="message" name="message" placeholder="Tell us about your business and what you'd like to achieve..." required></textarea>
+          </div>
+          <button type="submit" class="submit-btn" id="submit-btn">Book My Free Demo</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2026 Sphere Global. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // ---- FORM SUBMISSION ----
+    // IMPORTANT: Replace this URL with your deployed Render backend URL when live!
+    const BACKEND_URL = 'https://sphere-global-backend.onrender.com';
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      const successEl = document.getElementById('success-message');
+      const errorEl = document.getElementById('error-message');
+      
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+      successEl.style.display = 'none';
+      errorEl.style.display = 'none';
+
+      // Track form submission attempt
+      trackEvent('form_submit_attempt', { form: 'book_demo' });
+
+      const payload = {
+        full_name: document.getElementById('full_name').value,
+        email: document.getElementById('email').value,
+        company: document.getElementById('company').value,
+        phone: document.getElementById('phone').value,
+        message: document.getElementById('message').value,
+      };
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/contact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          successEl.style.display = 'block';
+          document.getElementById('contact-form').reset();
+          // Track successful conversion
+          trackEvent('form_submit_success', { form: 'book_demo', segment: data.segment });
+          // GA4 conversion event
+          gtag('event', 'generate_lead', { currency: 'USD', value: 1.0 });
+        } else {
+          errorEl.textContent = data.detail || 'Something went wrong. Please try again.';
+          errorEl.style.display = 'block';
+        }
+      } catch (err) {
+        errorEl.textContent = 'Cannot connect to server. Please check your connection.';
+        errorEl.style.display = 'block';
+        trackEvent('form_submit_error', { error: err.message });
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Book My Free Demo';
+      }
+    }
+
+    // Track time on page
+    let startTime = Date.now();
+    window.addEventListener('beforeunload', function() {
+      const timeSpent = Math.round((Date.now() - startTime) / 1000);
+      trackEvent('time_on_page', { seconds: timeSpent });
+    });
+  </script>
+</body>
+</html>

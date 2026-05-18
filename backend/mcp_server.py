@@ -9,6 +9,7 @@ from google.analytics.data_v1beta.types import (
     RunReportRequest,
 )
 from google.oauth2.credentials import Credentials
+from backend.database import get_all_contacts, get_contacts_by_segment, get_contact_by_email
 
 # Load environment variables
 load_dotenv()
@@ -117,5 +118,65 @@ def get_traffic_sources(start_date: str = "30daysAgo", end_date: str = "today") 
     except Exception as e:
         return f"Error fetching GA4 data: {str(e)}"
 
+@mcp.tool()
+def get_crm_leads() -> str:
+    """
+    Fetches all CRM lead contacts that have submitted a contact/demo request form on the target website.
+    """
+    try:
+        contacts = get_all_contacts()
+        if not contacts:
+            return "No contacts or leads found in the CRM database."
+        
+        result = "CRM Leads:\n"
+        result += "Name | Email | Company | Phone | Segment | Submitted At\n"
+        result += "-" * 80 + "\n"
+        for c in contacts:
+            result += f"{c['full_name']} | {c['email']} | {c['company'] or 'N/A'} | {c['phone'] or 'N/A'} | {c['segment']} | {c['created_at']}\n"
+        return result
+    except Exception as e:
+        return f"Error retrieving CRM leads: {str(e)}"
+
+@mcp.tool()
+def get_audience_segment(segment_name: str) -> str:
+    """
+    Filters CRM leads by their assigned audience segment (e.g. 'High-Value Lead', 'Business Lead', 'Warm Lead', 'New Subscriber').
+    """
+    try:
+        contacts = get_contacts_by_segment(segment_name)
+        if not contacts:
+            return f"No leads found in segment: '{segment_name}'"
+        
+        result = f"Segment: {segment_name}\n"
+        result += "Name | Email | Company | Phone | Submitted At\n"
+        result += "-" * 70 + "\n"
+        for c in contacts:
+            result += f"{c['full_name']} | {c['email']} | {c['company'] or 'N/A'} | {c['phone'] or 'N/A'} | {c['created_at']}\n"
+        return result
+    except Exception as e:
+        return f"Error filtering segment: {str(e)}"
+
+@mcp.tool()
+def get_customer_journey(email: str) -> str:
+    """
+    Retrieves the complete journey/timeline of submissions for a given user email address.
+    """
+    try:
+        contacts = get_contact_by_email(email)
+        if not contacts:
+            return f"No submission history found for email: {email}"
+        
+        result = f"Customer Journey for {email} ({len(contacts)} event(s)):\n\n"
+        for idx, c in enumerate(contacts, 1):
+            result += f"Event #{idx} - {c['created_at']}\n"
+            result += f"  Name: {c['full_name']}\n"
+            result += f"  Company: {c['company'] or 'N/A'} | Phone: {c['phone'] or 'N/A'}\n"
+            result += f"  Segment Assigned: {c['segment']}\n"
+            result += f"  Message: \"{c['message']}\"\n\n"
+        return result
+    except Exception as e:
+        return f"Error retrieving customer journey: {str(e)}"
+
 if __name__ == "__main__":
     mcp.run()
+
