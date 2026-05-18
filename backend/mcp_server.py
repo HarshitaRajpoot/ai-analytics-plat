@@ -49,7 +49,7 @@ def get_website_traffic(start_date: str = "7daysAgo", end_date: str = "today") -
     client = get_ga_client()
     request = RunReportRequest(
         property=f"properties/{PROPERTY_ID}",
-        dimensions=[Dimension(name="date")],
+        dimensions=[Dimension(name="date"), Dimension(name="hostName")],
         metrics=[
             Metric(name="activeUsers"),
             Metric(name="sessions"),
@@ -71,10 +71,17 @@ def get_website_traffic(start_date: str = "7daysAgo", end_date: str = "today") -
         total_users = 0
         total_sessions = 0
         
+        # Group by date to aggregate rows from multiple valid hostnames
+        daily_dict = {}
+        
         for row in response.rows:
             date = row.dimension_values[0].value
-            # Format date to YYYY-MM-DD
-            formatted_date = f"{date[:4]}-{date[4:6]}-{date[6:8]}"
+            host = row.dimension_values[1].value.lower()
+            
+            # Skip any tracking traffic that came from the dashboard itself
+            if "ai-analytics-frontend" in host or "sphere-global-dashboard" in host:
+                continue
+
             users = int(row.metric_values[0].value)
             sessions = int(row.metric_values[1].value)
             views = int(row.metric_values[2].value)
@@ -82,7 +89,16 @@ def get_website_traffic(start_date: str = "7daysAgo", end_date: str = "today") -
             total_users += users
             total_sessions += sessions
             
-            result += f"{formatted_date} | {users} | {sessions} | {views}\n"
+            formatted_date = f"{date[:4]}-{date[4:6]}-{date[6:8]}"
+            if formatted_date not in daily_dict:
+                daily_dict[formatted_date] = {"users": 0, "sessions": 0, "views": 0}
+            daily_dict[formatted_date]["users"] += users
+            daily_dict[formatted_date]["sessions"] += sessions
+            daily_dict[formatted_date]["views"] += views
+
+        # Append aggregated results
+        for f_date, metrics in sorted(daily_dict.items()):
+            result += f"{f_date} | {metrics['users']} | {metrics['sessions']} | {metrics['views']}\n"
             
         result += "-" * 50 + "\n"
         result += f"Totals: {total_users} Users, {total_sessions} Sessions\n"

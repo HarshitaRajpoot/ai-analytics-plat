@@ -59,7 +59,7 @@ def get_website_traffic(start_date: str = "7daysAgo", end_date: str = "today"):
     client = get_ga_client()
     request = RunReportRequest(
         property=f"properties/{PROPERTY_ID}",
-        dimensions=[Dimension(name="date")],
+        dimensions=[Dimension(name="date"), Dimension(name="hostName")],
         metrics=[
             Metric(name="activeUsers"),
             Metric(name="sessions"),
@@ -71,7 +71,7 @@ def get_website_traffic(start_date: str = "7daysAgo", end_date: str = "today"):
     )
     try:
         response = client.run_report(request)
-        daily_data = []
+        daily_dict = {}
         total_users = 0
         total_sessions = 0
         total_views = 0
@@ -83,20 +83,32 @@ def get_website_traffic(start_date: str = "7daysAgo", end_date: str = "today"):
 
         for row in response.rows:
             date = row.dimension_values[0].value
-            formatted_date = f"{date[4:6]}/{date[6:8]}"
+            host = row.dimension_values[1].value.lower()
+            
+            # Skip any tracking traffic that came from the dashboard itself
+            if "ai-analytics-frontend" in host or "sphere-global-dashboard" in host:
+                continue
+
             users = int(row.metric_values[0].value)
             sessions = int(row.metric_values[1].value)
             views = int(row.metric_values[2].value)
             bounce = float(row.metric_values[3].value)
             duration = float(row.metric_values[4].value)
-            daily_data.append({"date_raw": date, "name": formatted_date, "users": users, "sessions": sessions})
+            
             total_users += users
             total_sessions += sessions
             total_views += views
             total_bounce += bounce
             total_duration += duration
 
-        num_days = len(response.rows)
+            formatted_date = f"{date[4:6]}/{date[6:8]}"
+            if date not in daily_dict:
+                daily_dict[date] = {"date_raw": date, "name": formatted_date, "users": 0, "sessions": 0}
+            daily_dict[date]["users"] += users
+            daily_dict[date]["sessions"] += sessions
+
+        daily_data = list(daily_dict.values())
+        num_days = len(daily_data)
         avg_bounce = round(total_bounce / num_days * 100, 1) if num_days > 0 else 0
         avg_dur_seconds = int(total_duration / num_days) if num_days > 0 else 0
         mins, secs = divmod(avg_dur_seconds, 60)
