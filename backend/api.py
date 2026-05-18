@@ -33,6 +33,11 @@ def send_email(to_email: str, subject: str, html_content: str):
     api_key = os.getenv("SENDGRID_API_KEY")
     from_email = os.getenv("SENDGRID_FROM_EMAIL")
     
+    if api_key:
+        api_key = api_key.strip()
+    if from_email:
+        from_email = from_email.strip()
+    
     if not api_key or not from_email:
         print("SendGrid Email Warning: SENDGRID_API_KEY or SENDGRID_FROM_EMAIL is not set. Email skipped.")
         return False
